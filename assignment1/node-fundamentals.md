@@ -24,6 +24,11 @@ CommonJS is the traditional system used in Node.js where we use `require()` to i
 
   // app.js
   const { add } = require('./math');
+  ```
+
+  - **ES Modules Example:**
+
+  ```javascript
 
   // math.js
 export const add = (a, b) => a + b;
