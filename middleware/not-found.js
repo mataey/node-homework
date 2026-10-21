@@ -1,5 +1,7 @@
 function notFound(req, res, next) {
-  res.status(404).send("Not Found");
+  res.status(404).json({
+    error: "Not Found",
+  });
 }
 
-export default notFound;
+module.exports = notFound;
