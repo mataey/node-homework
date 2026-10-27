@@ -3,34 +3,53 @@ import dogData from "../dogData.js";
 
 const router = express.Router();
 
+class ValidationError extends Error {
+  constructor(message) {
+    super(message);
+    this.name = "ValidationError";
+  }
+}
+
+class NotFoundError extends Error {
+  constructor(message) {
+    super(message);
+    this.name = "NotFoundError";
+  }
+}
+
 router.get("/dogs", (req, res) => {
   res.json(dogData);
 });
 
 router.post("/adopt", (req, res, next) => {
-  const { name, address, email, dogName } = req.body;
+  try {
+    const { name, address, email, dogName } = req.body || {};
 
+    if (!name || !email || !dogName) {
+      throw new ValidationError("Missing required fields");
+    }
 
-  // Throw a ValidationError
+    const dog = dogData.find(
+      (d) => d.name === dogName && d.status === "available",
+    );
 
+    if (!dog) {
+      throw new NotFoundError(`Dog "${dogName}" not found or not available`);
+    }
 
-
-  const dog = dogData.find((d) => d.name === dogName && d.status === "available");
-  // Throw a NotFoundError
-
-
-
-  
-  return res.status(201).json({
-    message: `Adoption request received. We will contact you at ${email} for further details.`,
-    application: {
-      name,
-      address,
-      email,
-      dogName,
-      applicationId: Date.now(),
-    },
-  });
+    return res.status(201).json({
+      message: `Adoption request received. We will contact you at ${email} for further details.`,
+      application: {
+        name,
+        address,
+        email,
+        dogName,
+        applicationId: Date.now(),
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
 });
 
 router.get("/error", (req, res, next) => {
