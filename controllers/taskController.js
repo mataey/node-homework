@@ -52,9 +52,7 @@ async function index(req, res) {
     return res.status(401).json({ message: "Unauthorized" });
   }
 
-  const tasks = global.tasks.filter((task) =>
-    ownedTask(task, global.user_id)
-  );
+  const tasks = global.tasks.filter((task) => ownedTask(task, global.user_id));
 
   if (tasks.length === 0) {
     return res.status(404).json({ message: "No tasks found" });
@@ -75,8 +73,7 @@ async function show(req, res) {
   }
 
   const task = global.tasks.find(
-    (item) => Number(item.id) === Number(id) &&
-      ownedTask(item, global.user_id)
+    (item) => Number(item.id) === Number(id) && ownedTask(item, global.user_id),
   );
 
   if (!task) {
@@ -106,15 +103,17 @@ async function update(req, res) {
   }
 
   const task = global.tasks.find(
-    (item) => Number(item.id) === Number(id) &&
-      ownedTask(item, global.user_id)
+    (item) => Number(item.id) === Number(id) && ownedTask(item, global.user_id),
   );
 
   if (!task) {
     return res.status(404).json({ message: "Task not found" });
   }
 
-  if (value.title !== undefined) task.title = value.title;
+  if (value.title !== undefined) {
+    task.title = value.title;
+  }
+
   if (value.isCompleted !== undefined) {
     task.isCompleted = value.isCompleted;
   }
@@ -134,17 +133,21 @@ async function deleteTask(req, res) {
   }
 
   const taskIndex = global.tasks.findIndex(
-    (item) => Number(item.id) === Number(id) &&
-      ownedTask(item, global.user_id)
+    (item) => Number(item.id) === Number(id) && ownedTask(item, global.user_id),
   );
 
   if (taskIndex === -1) {
     return res.status(404).json({ message: "Task not found" });
   }
 
+  // Save the task before removing it.
+  const deletedTask = global.tasks[taskIndex];
+
+  // Remove the task from the list.
   global.tasks.splice(taskIndex, 1);
 
-  return res.status(200).json({ message: "Task deleted successfully" });
+  // Return the deleted task without exposing userId.
+  return res.status(200).json(publicTask(deletedTask));
 }
 
 module.exports = {
